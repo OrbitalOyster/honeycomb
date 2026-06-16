@@ -30,20 +30,31 @@ func main() {
 
 	world := World{}
 	world.Generate(5)
+
+	CreateCamera(
+		raylib.NewVector3(0.0, 8.0, 1.0),
+		raylib.NewVector3(0.0, 0.0, 0.0),
+		raylib.NewVector3(0.0, 1.0, 0.0),
+		60.0,
+		raylib.CameraPerspective,
+	)
+
 	for !raylib.WindowShouldClose() {
 		HandleMouse()
 		HandleKeyboard()
 
+		activeCamera := GetActiveCamera()
+
 		raylib.SetShaderValue(
 			defaultShader,
 			viewPosLoc,
-			[]float32{defaultCamera.Position.X, defaultCamera.Position.Y, defaultCamera.Position.Z},
+			[]float32{activeCamera.Position.X, activeCamera.Position.Y, activeCamera.Position.Z},
 			raylib.ShaderUniformVec3,
 		)
 
 		raylib.BeginDrawing()
 		raylib.ClearBackground(raylib.SkyBlue)
-		raylib.BeginMode3D(defaultCamera)
+		raylib.BeginMode3D(activeCamera.Camera3D)
 		world.Draw()
 
 		for i := range MAX_LIGHTS {

@@ -9,17 +9,19 @@ const mouseZoomSpeed = .25
 var previousMousePosition raylib.Vector2
 
 func HandleMouse() {
+	activeCamera := GetActiveCamera()
 	mousePosition := raylib.GetMousePosition()
-	mouseXZ := ScreenPositionToXZ(mousePosition, defaultCamera)
+	mouseXZ := activeCamera.GetScreenPositionToXZ(mousePosition)
 	/* Camera pan */
 	if raylib.IsMouseButtonDown(raylib.MouseButtonMiddle) {
-		oldMouseXZ := ScreenPositionToXZ(previousMousePosition, defaultCamera)
+		oldMouseXZ := activeCamera.GetScreenPositionToXZ(previousMousePosition)
 		deltaMouse := raylib.Vector3Subtract(oldMouseXZ, mouseXZ)
-		defaultCamera.Position = raylib.Vector3Add(defaultCamera.Position, deltaMouse)
-		defaultCamera.Target = raylib.Vector3Add(defaultCamera.Target, deltaMouse)
+		activeCamera.Move(deltaMouse)
 	}
 	/* Camera height */
-	defaultCamera.Position.Y = max(defaultCamera.Position.Y-raylib.GetMouseWheelMove()*mouseZoomSpeed, 1.0)
+	deltaHeight := raylib.GetMouseWheelMove() * mouseZoomSpeed
+	activeCamera.Position.Y = max(activeCamera.Position.Y-deltaHeight, 1.0)
+
 	previousMousePosition = mousePosition
 }
 
@@ -39,5 +41,8 @@ func HandleKeyboard() {
 	if raylib.IsKeyDown(raylib.KeyD) {
 		lights[0].position = raylib.Vector3Add(lights[0].position, raylib.NewVector3(0.1, 0.0, 0.0))
 		lights[0].Update()
+	}
+	if raylib.IsKeyPressed(raylib.KeyC) {
+		NextCamera()
 	}
 }
