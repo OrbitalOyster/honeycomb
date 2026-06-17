@@ -31,6 +31,7 @@ func LoadAssets() {
 
 	tmpImage = raylib.LoadImage(noiseTextureFilename)
 	noiseTexture = raylib.LoadTextureFromImage(tmpImage)
+
 	raylib.UnloadImage(tmpImage)
 
 	defaultModel = raylib.LoadModel(defaultModelFilename)

@@ -19,7 +19,7 @@ func main() {
 
 	ambientColorLoc := raylib.GetShaderLocation(defaultShader, "ambientColor")
 	if ambientColorLoc == -1 {
-		// panic("Shader location not found")
+		panic("Shader location not found")
 	}
 	raylib.SetShaderValue(defaultShader, ambientColorLoc, ambientColor, raylib.ShaderUniformVec3)
 
@@ -33,9 +33,20 @@ func main() {
 	skyboxImg := raylib.LoadImage("assets/textures/skybox.png")
 	skyboxTexture := raylib.LoadTextureCubemap(skyboxImg, raylib.CubemapLayoutAutoDetect)
 	raylib.SetMaterialTexture(skybox.Materials, raylib.MapCubemap, skyboxTexture)
-	skybox.GetMaterials()[0].Shader = defaultShader
+	skyboxShader := raylib.LoadShader("assets/shaders/skybox.vs", "assets/shaders/skybox.fs")
+	skybox.GetMaterials()[0].Shader = skyboxShader
+	// setShaderIntValue(skyboxShader, "skyboxMap", raylib.MapCubemap)
 
-	setShaderIntValue(defaultShader, "emap", raylib.MapCubemap)
+	foo := raylib.MapCubemap
+	skyboxMapLoc := raylib.GetShaderLocation(skyboxShader, "skyboxMap")
+	if skyboxMapLoc == -1 {
+		panic("Shader location not found")
+	}
+	raylib.SetShaderValue(
+		skyboxShader, skyboxMapLoc,
+		unsafe.Slice((*float32)(unsafe.Pointer(&foo)), 4),
+		raylib.ShaderUniformInt,
+	)
 
 	raylib.UnloadImage(skyboxImg)
 
@@ -46,8 +57,8 @@ func main() {
 	world.Generate(5)
 
 	CreateCamera(
-		raylib.NewVector3(0.0, 8.0, 1.0),
-		raylib.NewVector3(0.0, 0.0, 0.0),
+		raylib.NewVector3(-3.0, 0.25, 3.0),
+		raylib.NewVector3(0.0, 1.5, 0.0),
 		raylib.NewVector3(0.0, 1.0, 0.0),
 		60.0,
 		raylib.CameraPerspective,
@@ -58,7 +69,7 @@ func main() {
 		HandleKeyboard()
 
 		activeCamera := GetActiveCamera()
-		// raylib.UpdateCamera(&activeCamera.Camera3D, raylib.CameraFirstPerson)
+		raylib.UpdateCamera(&activeCamera.Camera3D, raylib.CameraFirstPerson)
 
 		raylib.SetShaderValue(
 			defaultShader,
@@ -100,6 +111,9 @@ func main() {
 		raylib.EndDrawing()
 	}
 	raylib.UnloadMesh(&hexMesh)
+
+	raylib.UnloadShader(skyboxShader)
+
 	UnloadAssets()
 	raylib.CloseWindow()
 }
