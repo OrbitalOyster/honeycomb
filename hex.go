@@ -7,13 +7,13 @@ import (
 )
 
 type Hex struct {
-	Q            int
-	R            int
-	S            int
-	Color        raylib.Color
-	Parent       *Chunk
+	Q        int
+	R        int
+	S        int
+	Color    raylib.Color
+	Parent   *Chunk
 	Position raylib.Vector3
-	seed         int
+	seed     int
 }
 
 var hexMesh raylib.Mesh
@@ -76,7 +76,9 @@ func GenerateHexMesh() raylib.Mesh {
 func GenerateHexModel() {
 	hexMesh = GenerateHexMesh()
 	hexModel = raylib.LoadModelFromMesh(hexMesh)
-	hexModel.Materials.Maps.Texture = defaultTexture
+	// hexModel.Materials.Maps.Texture = defaultTexture
+	raylib.SetMaterialTexture(hexModel.Materials, raylib.MapAlbedo, defaultTexture)
+	raylib.SetMaterialTexture(hexModel.Materials, raylib.MapSpecular, noiseTexture)
 }
 
 func NewHex(q int, r int, s int, color raylib.Color, parent *Chunk) Hex {

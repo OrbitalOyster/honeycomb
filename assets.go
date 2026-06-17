@@ -12,6 +12,8 @@ var (
 	defaultFont            raylib.Font
 	defaultTextureFilename = filepath.Join("assets", "textures", "ground.png")
 	defaultTexture         raylib.Texture2D
+	noiseTextureFilename   = filepath.Join("assets", "textures", "noise.png")
+	noiseTexture           raylib.Texture2D
 	defaultModelFilename   = filepath.Join("assets", "models", "monkey.gltf")
 	defaultModel           raylib.Model
 	defaultVShaderFilename = filepath.Join("assets", "shaders", "default.vs")
@@ -21,9 +23,16 @@ var (
 
 func LoadAssets() {
 	defaultFont = raylib.LoadFontEx(defaultFontFilename, int32(defaultFontSize), nil)
-	tmpImage := raylib.LoadImage(defaultTextureFilename)
+
+	var tmpImage *raylib.Image
+
+	tmpImage = raylib.LoadImage(defaultTextureFilename)
 	defaultTexture = raylib.LoadTextureFromImage(tmpImage)
+
+	tmpImage = raylib.LoadImage(noiseTextureFilename)
+	noiseTexture = raylib.LoadTextureFromImage(tmpImage)
 	raylib.UnloadImage(tmpImage)
+
 	defaultModel = raylib.LoadModel(defaultModelFilename)
 	defaultShader = raylib.LoadShader(defaultVShaderFilename, defaultFShaderFilename)
 }

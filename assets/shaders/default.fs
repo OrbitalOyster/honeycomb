@@ -19,6 +19,7 @@ struct Light {
 uniform vec4 colDiffuse; /* Tint parameter in DrawModel() */
 uniform vec3 viewPos;
 uniform sampler2D texture0;
+uniform samplerCube emap;
 uniform Light lights[MAX_LIGHTS];
 
 out vec4 finalColor;
@@ -26,6 +27,7 @@ out vec4 finalColor;
 void main()
 {
     vec4 texelColor = texture(texture0, fragTexCoord);
+    // vec4 texelColor = texture(emap, fragPosition);
     if (texelColor.a < 0.25) {
         discard;
     }
@@ -69,4 +71,6 @@ void main()
     finalColor = texelColor * colDiffuse * vec4((ambientColor + lighting + fresnel), 1.0);
 
     finalColor = mix(fogColor, finalColor, fogFactor);
+
+    // finalColor = texture(emap, fragPosition);
 }

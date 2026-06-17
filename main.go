@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"unsafe"
 
 	raylib "github.com/gen2brain/raylib-go/raylib"
 )
@@ -9,14 +10,16 @@ import (
 func main() {
 	raylib.SetConfigFlags(raylib.FlagVsyncHint)
 	raylib.SetConfigFlags(raylib.FlagMsaa4xHint)
-	raylib.InitWindow(720, 720, "Honeycomb")
+	// raylib.InitWindow(720, 720, "Honeycomb")
+	raylib.InitWindow(1920, 1080, "Honeycomb")
+	raylib.ToggleFullscreen()
 	raylib.SetTargetFPS(120)
 	LoadAssets()
 	GenerateHexModel()
 
 	ambientColorLoc := raylib.GetShaderLocation(defaultShader, "ambientColor")
 	if ambientColorLoc == -1 {
-		panic("Shader location not found")
+		// panic("Shader location not found")
 	}
 	raylib.SetShaderValue(defaultShader, ambientColorLoc, ambientColor, raylib.ShaderUniformVec3)
 
@@ -24,6 +27,17 @@ func main() {
 
 	CreateLight(defaultShader, raylib.NewVector3(1.0, 2.0, 3.0), raylib.Red, 10)
 	CreateLight(defaultShader, raylib.NewVector3(-1.0, 2.0, -3.0), raylib.Green, 32)
+
+	cube := raylib.GenMeshCube(1.0, 1.0, 1.0)
+	skybox := raylib.LoadModelFromMesh(cube)
+	skyboxImg := raylib.LoadImage("assets/textures/skybox.png")
+	skyboxTexture := raylib.LoadTextureCubemap(skyboxImg, raylib.CubemapLayoutAutoDetect)
+	raylib.SetMaterialTexture(skybox.Materials, raylib.MapCubemap, skyboxTexture)
+	skybox.GetMaterials()[0].Shader = defaultShader
+
+	setShaderIntValue(defaultShader, "emap", raylib.MapCubemap)
+
+	raylib.UnloadImage(skyboxImg)
 
 	defaultModel.GetMaterials()[1].Shader = defaultShader
 	hexModel.GetMaterials()[0].Shader = defaultShader
@@ -44,6 +58,7 @@ func main() {
 		HandleKeyboard()
 
 		activeCamera := GetActiveCamera()
+		// raylib.UpdateCamera(&activeCamera.Camera3D, raylib.CameraFirstPerson)
 
 		raylib.SetShaderValue(
 			defaultShader,
@@ -55,6 +70,13 @@ func main() {
 		raylib.BeginDrawing()
 		raylib.ClearBackground(raylib.SkyBlue)
 		raylib.BeginMode3D(activeCamera.Camera3D)
+
+		raylib.DisableBackfaceCulling()
+		raylib.DisableDepthMask()
+		raylib.DrawModel(skybox, raylib.NewVector3(0.0, 0.0, 0.0), 1.0, raylib.White)
+		raylib.EnableBackfaceCulling()
+		raylib.EnableDepthMask()
+
 		world.Draw()
 
 		for i := range MAX_LIGHTS {
@@ -80,4 +102,13 @@ func main() {
 	raylib.UnloadMesh(&hexMesh)
 	UnloadAssets()
 	raylib.CloseWindow()
+}
+
+func setShaderIntValue(shader raylib.Shader, name string, value int32) {
+	raylib.SetShaderValue(
+		shader,
+		raylib.GetShaderLocation(shader, name),
+		unsafe.Slice((*float32)(unsafe.Pointer(&value)), 4),
+		raylib.ShaderUniformInt,
+	)
 }
